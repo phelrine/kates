@@ -18,13 +18,14 @@ def main():
                 "RIGHT_SHOULDER": 90, "RIGHT_ELBOW": 104 }
     AXES = ["X", "Y", "Z"]
     data = []
+
     header = []
-    map(lambda key: header.extend(map(lambda a: key + "_" + a, AXES)), sorted(COLUMNS.keys()))
+    for key in sorted(COLUMNS.keys()):
+        header.extend(map(lambda a: key + "_" + a, AXES))
     data.append(header)
     
     reader = csv.reader(sys.stdin)
     reader.next()
-    
     for line in reader:
         matrixes = dict(map((lambda(joint, column): 
                              (joint, scipy.array(map((lambda x: float(x)), line[column : (column + 9)])).reshape(3, 3))),
