@@ -13,16 +13,12 @@ def main():
     reader = csv.reader(sys.stdin)
     header = parse_header(reader.next())
 
-    data = []
-    data.append(flatten([[column + "_" + label for label in ["X", "Y", "Z"]] for column in columns]))
+    writer = csv.writer(sys.stdout)
+    writer.writerow(flatten([[column + "_" + label for label in ["X", "Y", "Z"]] for column in columns]))
     for row in reader:
         matrixes = dict([(column, scipy.array([float(x) for x in row[header[column]:(header[column]+9)]]).reshape(3,3)) for column in columns])
         converted = convert_absolute_to_relative(matrixes)
-        data.append(flatten([matrix_to_angle(converted[column]) for column in columns]))
-
-    fix_jump(data)
-
-    csv.writer(sys.stdout).writerows(data)
+        writer.writerow(flatten([matrix_to_angle(converted[column]) for column in columns]))
 
 def parse_header(header):
     columns = {}
@@ -48,20 +44,6 @@ def matrix_to_angle(m):
     x = arctan2(m[2, 1], m[2, 2])
     z = arctan2(m[1, 0], m[0, 0])
     return [x, y, z]
-
-def fix_jump(data):
-    column_len = len(data[0])
-    prev =  data[1]
-    for row in data[2:]:
-        for i in range(column_len):
-            sign = row[i] * prev[i]
-            diff = abs(row[i] - prev[i])
-            if( sign < 0 and diff > pi * 1.8):
-                if(diff > pi * 2):
-                    row[i] = -row[i]
-                else:
-                    row[i] = 2 * pi + row[i] if(prev[i] > 0) else -2 * pi + row[i]
-        prev = row
 
 if __name__ == "__main__":
     main()
