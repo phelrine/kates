@@ -1,6 +1,7 @@
-#!/usr/bin/end python
+#!/usr/bin/env python
 
-import sys, csv, scipy
+import sys, csv
+from scipy import genfromtxt
 from os.path import basename
 from scipy.linalg import svd
 
@@ -8,7 +9,7 @@ def main():
     lines = []
     all_data = []
     for filename in sys.argv[1:]:
-        data = scipy.genfromtxt(filename, delimiter = ",", skip_header = 1)
+        data = genfromtxt(filename, delimiter = ",", skip_header = 1)
         lines.append(len(data))
         all_data.extend(data)
 
