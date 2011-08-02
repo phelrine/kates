@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, csv, scipy
+from math import pi
 from scipy import sqrt, arctan2, arcsin, arccos, sin, cos, dot
 
 def flatten(L):
@@ -31,7 +32,8 @@ def main():
                              (joint, scipy.array(map((lambda x: float(x)), line[column : (column + 9)])).reshape(3, 3))),
                             COLUMNS.items()))
         data.append(flatten(map(lambda(key, val): convert_matrix_to_angle(val), sorted(convert_world_to_local(matrixes).items()))))
-    
+
+    fix_jump(data)    
     csv.writer(sys.stdout).writerows(data)
 
 def convert_world_to_local(joint_matrix):
@@ -52,6 +54,20 @@ def convert_matrix_to_angle(m):
     x = arctan2(m[2,1], m[2,2])
     z = arctan2(m[1,0], m[0,0])
     return [x, y, z]
+
+def fix_jump(data):
+    column_len = len(data[0])
+    prev =  data[1]
+    for row in data[2:]:
+        for i in range(column_len):
+            sign = row[i] * prev[i]
+            diff = abs(row[i] - prev[i])
+            if( sign < 0 and diff > pi * 1.8):
+                if(diff > pi * 2):
+                    row[i] = -row[i]
+                else:
+                    row[i] = 2 * pi + row[i] if(prev[i] > 0) else -2 * pi + row[i]
+        prev = row
 
 if __name__ == "__main__":
     main()
